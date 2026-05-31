@@ -5,13 +5,16 @@ class ProductsPage {
   }
 
   adicionarPrimeiroProdutoAoCarrinho() {
-    // Clica no botão "Add to cart" do primeiro produto que aparecer no resultado
     cy.get('.features_items .add-to-cart').first().click();
   }
 
   clicarContinuarComprando() {
-    // Fecha o modal de confirmação de sucesso que o e-commerce exibe
     cy.get('.modal-footer .close-modal').click();
+  }
+
+  // Novo método para clicar no link de "View Cart" dentro do modal de sucesso
+  clicarVerCarrinho() {
+    cy.get('.modal-body a[href="/view_cart"]').click();
   }
 }
 export default new ProductsPage();
