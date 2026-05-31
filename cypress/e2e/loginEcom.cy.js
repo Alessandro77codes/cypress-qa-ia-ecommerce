@@ -1,26 +1,40 @@
 import homePage from '../pages/homePage'
 import loginPage from '../pages/loginPage'
+import productsPage from '../pages/productsPage' // Importando a nova página
 
-describe('Aula 2 - Cenários de Login com Page Objects', () => {
+describe('Jornada de Testes no E-Commerce', () => {
   
   beforeEach(() => {
     homePage.acessarSite();
-    homePage.clicarLoginCadastro();
   });
 
-  it('Cenário 1: Deve exibir mensagem de erro ao inserir credenciais inválidas', () => {
-    // Tentando logar com um e-mail qualquer e senha errada
+  it('Aula 2 - Deve exibir mensagem de erro ao inserir credenciais inválidas', () => {
+    homePage.clicarLoginCadastro();
     loginPage.realizarLogin('teste_ia_alessandro@email.com', 'senhaIncorreta123');
-    
-    // Validando que a mensagem de erro do e-commerce ficou visível na tela
     cy.contains('Your email or password is incorrect!').should('be.visible');
   });
 
-  it('Cenário 2: Deve realizar login com sucesso usando credenciais válidas', () => {
-    // Aqui usamos um usuário cadastrado na plataforma para testes
+  it('Aula 2 - Deve realizar login com sucesso usando credenciais válidas', () => {
+    homePage.clicarLoginCadastro();
     loginPage.realizarLogin('alessandrovirtual@teste.com', '123456');
-    
-    // Validando que o botão de "Logout" ou o usuário logado apareceu na barra superior
     cy.contains('Logged in as').should('be.visible');
+  });
+
+  // ==================== NOVA AULA ====================
+  it('Aula 3 - Deve pesquisar um produto e adicioná-lo ao carrinho', () => {
+    // 1. Navega até a área de produtos
+    homePage.clicarEmProdutos();
+    
+    // 2. Pesquisa por uma camiseta (t-shirt) e submete
+    productsPage.pesquisarProduto('t-shirt');
+    
+    // 3. Adiciona o produto encontrado ao carrinho
+    productsPage.adicionarPrimeiroProdutoAoCarrinho();
+    
+    // 4. Valida que o modal de sucesso apareceu na tela
+    cy.contains('Added!').should('be.visible');
+    
+    // 5. Fecha o modal para garantir a limpeza do fluxo
+    productsPage.clicarContinuarComprando();
   });
 });
