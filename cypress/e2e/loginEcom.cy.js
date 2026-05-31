@@ -1,7 +1,8 @@
 import homePage from '../pages/homePage'
 import loginPage from '../pages/loginPage'
 import productsPage from '../pages/productsPage'
-import cartPage from '../pages/cartPage' // Importando a nova página do carrinho
+import cartPage from '../pages/cartPage'
+import checkoutPage from '../pages/checkoutPage' // Importando a nova página de checkout
 
 describe('Jornada de Testes no E-Commerce', () => {
   
@@ -24,34 +25,52 @@ describe('Jornada de Testes no E-Commerce', () => {
   it('Aula 3 - Deve pesquisar um produto e adicioná-lo ao carrinho', () => {
     homePage.clicarEmProdutos();
     productsPage.pesquisarProduto('t-shirt');
-    // CORRIGIDO: Chamando o método correto mapeado no seu arquivo de produtos
     productsPage.adicionarPrimeiroProdutoAoCarrinho();
     cy.contains('Added!').should('be.visible');
     productsPage.clicarContinuarComprando();
   });
 
-  // ==================== NOVA AULA ====================
   it('Aula 4 - Deve validar o produto no carrinho e prosseguir para o checkout', () => {
-    // 1. Faz o login primeiro para poder prosseguir para o checkout depois
     homePage.clicarLoginCadastro();
     loginPage.realizarLogin('alessandrovirtual@teste.com', '123456');
-
-    // 2. Busca e adiciona o produto
     homePage.clicarEmProdutos();
     productsPage.pesquisarProduto('t-shirt');
     productsPage.adicionarPrimeiroProdutoAoCarrinho();
-    
-    // 3. Em vez de fechar o modal, clica em "View Cart" para ir ao carrinho
+    productsPage.clicarVerCarrinho();
+    cartPage.validarProdutoNoCarrinho('Shirt');
+    cartPage.prosseguirParaCheckout();
+    cy.contains('Address Details').should('be.visible');
+  });
+
+  // ==================== NOVA AULA 5 ====================
+  it.only('Aula 5 - Deve realizar o checkout e finalizar o pedido com sucesso', () => {
+    // 1. Fluxo inicial: Login, Adição ao carrinho e ir para o Carrinho
+    homePage.clicarLoginCadastro();
+    loginPage.realizarLogin('alessandrovirtual@teste.com', '123456');
+    homePage.clicarEmProdutos();
+    productsPage.pesquisarProduto('t-shirt');
+    productsPage.adicionarPrimeiroProdutoAoCarrinho();
     productsPage.clicarVerCarrinho();
 
-    // 4. CORRIGIDO: Passando o termo que a tabela aceita com segurança
-    cartPage.validarProdutoNoCarrinho('Shirt');
-
-    // 5. Avança para a tela de checkout
+    // 2. Transição do Carrinho para a Revisão do Pedido (Checkout)
     cartPage.prosseguirParaCheckout();
 
-    // 6. Valida que chegamos na página de revisão do pedido
-    cy.contains('Address Details').should('be.visible');
-    cy.contains('Review Your Order').should('be.visible');
+    // 3. Ações na página de Checkout
+    checkoutPage.inserirComentarioPedido('Pedido automatizado com Cypress e IA.');
+    checkoutPage.clicarInserirPedido();
+
+    // 4. Preenchimento de dados de teste de pagamento
+    checkoutPage.preencherDadosPagamento(
+      'Alessandro C Santos', 
+      '4000123456789010', 
+      '123', 
+      '12', 
+      '2030'
+    );
+    checkoutPage.confirmarPagamento();
+
+    // 5. Validação final de Sucesso do Pedido
+    cy.contains('Order Placed!').should('be.visible');
+    cy.get('[data-qa="order-placed"]').should('be.visible');
   });
 });
